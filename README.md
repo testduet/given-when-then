@@ -117,7 +117,9 @@ describe('given a = 1 and b = 2', () => {
       outcome = a + b;
     });
 
-    it('should return 3', (_, outcome) => expect(outcome).toBe(3));
+    it('should return 3', (_, outcome) => {
+      expect(outcome).toBe(3);
+    });
   });
 });
 ```
