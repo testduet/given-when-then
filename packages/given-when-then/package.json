@@ -53,6 +53,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.26.9",
     "@babel/preset-typescript": "^7.27.0",
+    "@rollup/rollup-linux-x64-gnu": "^4.43.0",
     "@testing-library/react": "^16.3.0",
     "@tsconfig/recommended": "^1.0.8",
     "@tsconfig/strictest": "^2.0.5",
