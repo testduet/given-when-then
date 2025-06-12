@@ -218,10 +218,18 @@ function scenario(
   }
 
   const facility = {
-    afterEach: options?.afterEach || globalThis.afterEach,
-    beforeEach: options?.beforeEach || globalThis.beforeEach,
-    describe: options?.describe || globalThis.describe,
-    it: options?.it || globalThis.it
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    afterEach: options?.afterEach || (globalThis.afterEach as TestFacility['afterEach']),
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    beforeEach: options?.beforeEach || (globalThis.beforeEach as TestFacility['beforeEach']),
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    describe: options?.describe || (globalThis.describe as TestFacility['describe']),
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    it: options?.it || (globalThis.it as TestFacility['it'])
   };
 
   facility.describe(message, () => {
