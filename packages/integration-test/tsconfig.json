@@ -1,6 +1,8 @@
 // This configuration file is for VSCode only.
 {
   "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
     "jsx": "react"
   },
   "extends": "./tsconfig.custom.json"
