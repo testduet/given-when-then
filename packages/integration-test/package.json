@@ -1,0 +1,37 @@
+{
+  "name": "@testduet/given-when-then-integration-test",
+  "version": "0.0.0-0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "bump": "npm run bump:prod && npm run bump:dev",
+    "bump:dev": "PACKAGES_TO_BUMP=$(cat package.json | jq -r '(.pinDependencies // {}) as $P | (.localPeerDependencies // {}) as $L | (.devDependencies // {}) | to_entries | map(select(.key as $K | $L | has($K) | not)) | map(.key + \"@\" + ($P[.key] // [\"latest\"])[0]) | join(\" \")') && [ ! -z \"$PACKAGES_TO_BUMP\" ] && npm install $PACKAGES_TO_BUMP || true",
+    "bump:prod": "PACKAGES_TO_BUMP=$(cat package.json | jq -r '(.pinDependencies // {}) as $P | (.localPeerDependencies // {}) as $L | (.dependencies // {}) | to_entries | map(select(.key as $K | $L | has($K) | not)) | map(.key + \"@\" + ($P[.key] // [\"latest\"])[0]) | join(\" \")') && [ ! -z \"$PACKAGES_TO_BUMP\" ] && npm install $PACKAGES_TO_BUMP || true",
+    "precommit": "ESLINT_USE_FLAT_CONFIG=false eslint --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts ./",
+    "switch": "cat package.json | jq --arg SWITCH_NAME $SWITCH_NAME -r '(.[\"switch:\" + $SWITCH_NAME] // {}) as $TEMPLATE | .devDependencies += ($TEMPLATE.devDependencies // {}) | .dependencies += ($TEMPLATE.dependencies // {})' | tee ./package.json.tmp && mv ./package.json.tmp ./package.json",
+    "test": "npm run test:jasmine && npm run test:jest && npm run test:mocha && npm run test:node && npm run test:vitest",
+    "test:mocha": "mocha --recursive test/**/*.mocha.*",
+    "test:node": "node --test test/**/*.node.*",
+    "test:jasmine": "jasmine --config=jasmine.json",
+    "test:jest": "jest",
+    "test:vitest": "vitest run"
+  },
+  "author": "William Wong (https://github.com/compulim)",
+  "license": "MIT",
+  "localPeerDependencies": {
+    "@testduet/given-when-then": "^0.0.0-0"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.27.2",
+    "@babel/preset-react": "^7.27.1",
+    "@tsconfig/strictest": "^2.0.5",
+    "core-js-pure": "^3.41.0",
+    "jasmine": "^5.8.0",
+    "jest": "^30.0.0",
+    "mocha": "^11.6.0",
+    "vitest": "^3.2.3"
+  },
+  "dependencies": {
+    "@testduet/given-when-then": "^0.0.0-0"
+  }
+}

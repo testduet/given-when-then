@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://esm.sh; style-src 'self' 'unsafe-inline' https://unpkg.com;"
+      http-equiv="Content-Security-Policy"
+    />
+    <link crossorigin="anonymous" href="https://unpkg.com/mocha/mocha.css" rel="stylesheet" type="text/css" />
+    <link crossorigin="anonymous" href="assets/css/index.css" rel="stylesheet" type="text/css" />
+    <title>@testduet/given-when-then demo</title>
+    <script type="importmap">
+      {
+        "imports": {
+          "@testduet/given-when-then": "./static/given-when-then/js/main.js",
+          "expect": "https://esm.sh/expect?bundle=true",
+          "jest-mock": "https://esm.sh/jest-mock?bundle=true&exports=fn",
+          "msw": "https://esm.sh/msw",
+          "msw/browser": "https://esm.sh/msw/browser",
+          "prettier": "https://esm.sh/prettier",
+          "prettier/plugins/babel": "https://esm.sh/prettier/plugins/babel",
+          "prettier/plugins/estree": "https://esm.sh/prettier/plugins/estree",
+          "shiki": "https://esm.sh/shiki"
+        }
+      }
+    </script>
+    <script src="https://unpkg.com/mocha/mocha.js"></script>
+  </head>
+  <body>
+    <h1>given-when-then demo</h1>
+    <div id="test-code">
+      <pre id="test-code__code"></pre>
+      <div class="badge">Test code</div>
+    </div>
+    <div id="mocha">
+      <div class="badge">Test runner</div>
+    </div>
+    <script async type="module">
+      import { codeToHtml } from 'shiki';
+      import { format } from 'prettier';
+      import parserBabel from 'prettier/plugins/babel';
+      import parserESTree from 'prettier/plugins/estree';
+
+      const code = await format(document.querySelector('#test').textContent, {
+        parser: 'babel',
+        plugins: [parserBabel, parserESTree],
+
+        arrowParens: 'avoid',
+        bracketSameLine: false,
+        bracketSpacing: true,
+        endOfLine: 'auto',
+        printWidth: 120,
+        proseWrap: 'preserve',
+        quoteProps: 'as-needed',
+        semi: true,
+        singleQuote: true,
+        tabWidth: 2,
+        trailingComma: 'none'
+      });
+
+      document.querySelector('#test-code__code').textContent = code;
+      document.querySelector('#test-code__code').innerHTML = await codeToHtml(code, {
+        lang: 'javascript',
+        theme: 'github-dark-default'
+      });
+    </script>
+    <script type="module">
+      mocha.setup('bdd');
+    </script>
+    <script crossorigin="anonymous" id="test" type="module">
+      import { scenario } from '@testduet/given-when-then';
+      import { expect } from 'expect';
+      import { fn as jestFn } from 'jest-mock';
+      import { http, HttpResponse } from 'msw';
+      import { setupWorker } from 'msw/browser';
+
+      // Simple scenario
+
+      function sum(x, y) {
+        return x + y;
+      }
+
+      scenario('simple', bdd => {
+        bdd
+          .given('a = 1 and b = 2', () => ({ a: 1, b: 2 }))
+
+          .when('sum(a, b) is called', ({ a, b }) => {
+            return sum(a, b);
+          })
+
+          .then('should return 3', ({ a, b }, outcome) => {
+            expect(outcome).toBe(a + b);
+          });
+      });
+
+      // Scenario with Mock Service Worker
+
+      scenario('test /api/user', bdd => {
+        bdd
+          .given('a HTTP GET handler', () => {
+            return jestFn(() =>
+              HttpResponse.json({
+                id: 1,
+                name: 'John Doe'
+              })
+            );
+          })
+
+          .and(
+            'msw is enabled',
+            async handler => {
+              const worker = setupWorker(http.get('/api/user', handler));
+
+              await worker.start();
+
+              return { handler, worker };
+            },
+            ({ worker }) => {
+              worker.stop();
+            }
+          )
+
+          .when('fetching user data', () => {
+            return fetch('/api/user');
+          })
+
+          .then('the HTTP GET handler should have been called once', ({ handler }) => {
+            expect(handler).toHaveBeenCalledTimes(1);
+          })
+
+          .and('the response should return ok', (_, response) => {
+            expect(response.ok).toBe(true);
+          })
+
+          .and('the content type should be "application/json"', (_, response) => {
+            expect(response.headers.get('content-type')).toBe('application/json');
+          })
+
+          .when('body is parsed as JSON', (_, response) => {
+            return response.json();
+          })
+
+          .then('it should return an user object', (_, outcome) => {
+            expect(outcome).toEqual({ id: 1, name: 'John Doe' });
+          });
+      });
+    </script>
+    <script type="module">
+      mocha.run();
+    </script>
+  </body>
+</html>
