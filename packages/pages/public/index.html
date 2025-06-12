@@ -110,7 +110,11 @@
             async handler => {
               const worker = setupWorker(http.get('/api/user', handler));
 
-              await worker.start();
+              await worker.start({
+                serviceWorker: {
+                  url: 'mockServiceWorker.js'
+                }
+              });
 
               return { handler, worker };
             },
