@@ -1,4 +1,4 @@
-import isPromise from './private/isPromise';
+import isPromise from './private/isPromise.ts';
 
 interface BehaviorDrivenDevelopment {
   given: Given<void>;
@@ -88,6 +88,7 @@ type ThenFrame<TPrecondition, TOutcome> = {
   fn: (precondition: TPrecondition, outcome: TOutcome) => Promise<void> | void;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Frame = GivenFrame<unknown, any> | ThenFrame<unknown, unknown> | WhenFrame<unknown, unknown, any>;
 
 function createChain(mutableStacks: (readonly Frame[])[], stack: readonly Frame[]) {
