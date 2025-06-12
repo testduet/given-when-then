@@ -108,9 +108,13 @@
           .and(
             'msw is enabled',
             async handler => {
-              const worker = setupWorker(http.get('/api/user', handler));
+              const worker = setupWorker(http.get('api/user', handler));
 
-              await worker.start();
+              await worker.start({
+                serviceWorker: {
+                  url: 'mockServiceWorker.js'
+                }
+              });
 
               return { handler, worker };
             },
@@ -120,7 +124,7 @@
           )
 
           .when('fetching user data', () => {
-            return fetch('/api/user');
+            return fetch('api/user');
           })
 
           .then('the HTTP GET handler should have been called once', ({ handler }) => {

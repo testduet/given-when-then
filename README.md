@@ -43,11 +43,17 @@ function sum(x, y) {
 // Test scenario
 scenario('calling sum() with two values', bdd => {
   bdd
-    .given('a = 1 and b = 2', () => ({ a: 1, b: 2 }))
+    .given('a = 1 and b = 2', () => {
+      return { a: 1, b: 2 };
+    })
 
-    .when('sum(a, b) is called', ({ a, b }) => sum(a + b))
+    .when('sum(a, b) is called', ({ a, b }) => {
+      return sum(a + b);
+    })
 
-    .then('should return 3', ({ a, b }, outcome) => expect(outcome).toBe(a + b));
+    .then('should return 3', ({ a, b }, outcome) => {
+      expect(outcome).toBe(a + b);
+    });
 });
 ```
 
