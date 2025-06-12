@@ -76,7 +76,6 @@ type GivenFrame<TPrecondition, TNextPrecondition> = {
 };
 
 type WhenFrame<TPrecondition, TOutcome, TNextOutcome> = {
-  isConjunction: boolean;
   permutations: readonly WhenPermutation<TPrecondition, TOutcome, TNextOutcome>[];
   operation: 'when';
 };
@@ -112,7 +111,7 @@ function createChain(mutableStacks: (readonly Frame[])[], stack: readonly Frame[
 
       return {
         and: nextChain.given(true) as Given<Awaited<ReturnType<typeof setup>>>,
-        when: nextChain.when(false) as When<Awaited<ReturnType<typeof setup>>, void>
+        when: nextChain.when() as When<Awaited<ReturnType<typeof setup>>, void>
       } satisfies ReturnType<Given<Awaited<ReturnType<typeof setup>>>>;
     };
 
@@ -131,18 +130,18 @@ function createChain(mutableStacks: (readonly Frame[])[], stack: readonly Frame[
 
       return {
         and: nextChain.given(true) as Given<TNextPrecondition>,
-        when: nextChain.when(false) as When<TNextPrecondition, void>
+        when: nextChain.when() as When<TNextPrecondition, void>
       } satisfies ReturnType<Given<TNextPrecondition>>;
     }) satisfies Given<unknown>['oneOf'];
 
     return given;
   };
 
-  const when: (isConjunction: boolean) => When<unknown, unknown> = (isConjunction: boolean) => {
+  const when: () => When<unknown, unknown> = () => {
     const when: When<unknown, unknown> = (message, setup, teardown) => {
       const nextChain = createChain(
         mutableStacks,
-        Object.freeze([...stack, { isConjunction, operation: 'when', permutations: [[message, setup, teardown]] }])
+        Object.freeze([...stack, { operation: 'when', permutations: [[message, setup, teardown]] }])
       );
 
       return {
@@ -156,7 +155,6 @@ function createChain(mutableStacks: (readonly Frame[])[], stack: readonly Frame[
         Object.freeze([
           ...stack,
           {
-            isConjunction,
             operation: 'when',
             permutations
           } satisfies WhenFrame<unknown, unknown, TNextOutcome>
@@ -189,7 +187,7 @@ function createChain(mutableStacks: (readonly Frame[])[], stack: readonly Frame[
 
       return {
         and: currentChain.then(true),
-        when: currentChain.when(false)
+        when: currentChain.when()
       } satisfies ReturnType<Then<unknown, unknown>>;
     }) satisfies Then<unknown, unknown>;
   };
@@ -274,7 +272,7 @@ function runStack(
     }
   } else if (frame.operation === 'when') {
     for (const [message, setup, teardown] of frame.permutations) {
-      facility.describe(`${frame.isConjunction ? 'and' : 'when'} ${message}`, () => {
+      facility.describe(`when ${message}`, () => {
         let currentOutcomeRef: { value: unknown };
 
         facility.beforeEach(() => {
