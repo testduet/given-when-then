@@ -117,7 +117,7 @@ describe('given a = 1 and b = 2', () => {
       outcome = a + b;
     });
 
-    it('then should return 3', (_, outcome) => expect(outcome).toBe(3));
+    it('should return 3', (_, outcome) => expect(outcome).toBe(3));
   });
 });
 ```
@@ -129,11 +129,17 @@ With our package, we are introducing an unique pattern based on BDD "given-when-
 ```ts
 scenario('simple', bdd => {
   bdd
-    .given('a = 1 and b = 2', () => ({ a: 1, b: 2 }))
+    .given('a = 1 and b = 2', () => {
+      return { a: 1, b: 2 };
+    })
 
-    .when('a + b', ({ a, b }) => a + b)
+    .when('a + b', ({ a, b }) => {
+      return a + b;
+    })
 
-    .then('should return 3', (_, outcome) => expect(outcome).toBe(3));
+    .then('should return 3', (_, outcome) => {
+      expect(outcome).toBe(3);
+    });
 });
 ```
 
@@ -146,7 +152,9 @@ Parameterized testing is a feature to increase test coverage without bloating up
 ```ts
 scenario('simple', bdd => {
   bdd
-    .given('a = 1 and b = 2', () => ({ a: 1, b: 2 }))
+    .given('a = 1 and b = 2', () => {
+      return { a: 1, b: 2 };
+    })
 
     .when.oneOf([
       ['a + b', ({ a, b }) => ({ actual: a + b, expected: 3 })],
@@ -166,13 +174,19 @@ scenario('simple', bdd => {
   const branch = bdd.given('a = 1 and b = 2', () => ({ a: 1, b: 2 }));
 
   branch
-    .when('a + b', ({ a, b }) => ({ actual: a + b, expected: 3 }))
+    .when('a + b', ({ a, b }) => {
+      return { actual: a + b, expected: 3 };
+    })
+
     .then('should return correct result', (_, { actual, expected }) => {
       expect(actual).toBe(expected);
     });
 
   branch
-    .when('a * b', ({ a, b }) => ({ actual: a * b, expected: 2 }))
+    .when('a * b', ({ a, b }) => {
+      return { actual: a * b, expected: 2 };
+    })
+
     .then('should return correct result', (_, { actual, expected }) => {
       expect(actual).toBe(expected);
     });
