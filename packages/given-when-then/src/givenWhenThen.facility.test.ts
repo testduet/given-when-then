@@ -9,6 +9,7 @@ type Stack = {
   numTest: number;
 };
 
+// TODO: Rewrite createStack so we can emit code as it is on describe-before-it-after, then do a match snapshot.
 function createStack(message: string): Stack {
   return {
     describes: [],
