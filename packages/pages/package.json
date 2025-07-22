@@ -58,14 +58,14 @@
   },
   "devDependencies": {
     "@tsconfig/strictest": "^2.0.5",
-    "@types/react": "^19.1.0",
-    "@types/react-dom": "^19.1.1",
-    "esbuild": "^0.25.2",
-    "typescript": "^5.8.2"
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "esbuild": "^0.25.8",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
     "@testduet/given-when-then": "^0.0.0-0",
-    "msw": "^2.10.2",
+    "msw": "^2.10.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "use-ref-from": "^0.1.0"
