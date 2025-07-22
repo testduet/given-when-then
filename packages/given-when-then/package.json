@@ -50,6 +50,12 @@
     "url": "https://github.com/testduet/given-when-then/issues"
   },
   "homepage": "https://github.com/testduet/given-when-then#readme",
+  "pinDependencies": {
+    "escape-string-regexp": [
+      "4",
+      "Jest does not support ESM natively."
+    ]
+  },
   "devDependencies": {
     "@babel/preset-env": "^7.28.0",
     "@babel/preset-typescript": "^7.27.1",
