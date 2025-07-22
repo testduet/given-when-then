@@ -51,9 +51,17 @@
   },
   "homepage": "https://github.com/testduet/given-when-then#readme",
   "pinDependencies": {
+    "@types/jest": [
+      "29",
+      "Jest 30.0.5 failed to load transformer"
+    ],
     "escape-string-regexp": [
       "4",
-      "Jest does not support ESM natively."
+      "Jest does not support ESM natively"
+    ],
+    "jest": [
+      "29",
+      "Jest 30.0.5 failed to load transformer"
     ]
   },
   "devDependencies": {
