@@ -7,13 +7,16 @@ const run = ({ filename }) => {
   const typeScript = require('typescript');
 
   const TS_EXPECT_ERROR = /(\/\/\s+)(@ts-expect-error)[\s+(.*)]/gu;
+  /** @type {import('typescript').CompilerOptions} */
   const TSCONFIG = {
     allowImportingTsExtensions: true,
     allowSyntheticDefaultImports: true,
     jsx: typeScript.JsxEmit.React,
     noEmit: true,
     skipLibCheck: true,
-    strict: true
+    strict: true,
+    target: typeScript.ScriptTarget.ESNext,
+    types: []
   };
 
   async function compile(filename) {
