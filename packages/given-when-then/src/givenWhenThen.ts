@@ -1,4 +1,4 @@
-import isPromise from './private/isPromise.ts';
+import isPromiseLike from './private/isPromiseLike.ts';
 
 interface BehaviorDrivenDevelopment {
   given: Given<void>;
@@ -7,16 +7,16 @@ interface BehaviorDrivenDevelopment {
 type GivenPermutation<TPrecondition, TNextPrecondition> =
   | readonly [
       string,
-      (precondition: TPrecondition) => Promise<TNextPrecondition> | TNextPrecondition,
-      ((precondition: TNextPrecondition) => Promise<void> | void) | undefined
+      (precondition: TPrecondition) => PromiseLike<TNextPrecondition> | TNextPrecondition,
+      ((precondition: TNextPrecondition) => PromiseLike<void> | void) | undefined
     ]
-  | readonly [string, (precondition: TPrecondition) => Promise<TNextPrecondition> | TNextPrecondition];
+  | readonly [string, (precondition: TPrecondition) => PromiseLike<TNextPrecondition> | TNextPrecondition];
 
 interface Given<TPrecondition> {
   <TNextPrecondition>(
     message: string,
-    setup: (precondition: TPrecondition) => Promise<TNextPrecondition> | TNextPrecondition,
-    teardown?: ((precondition: TNextPrecondition) => Promise<void> | void) | undefined
+    setup: (precondition: TPrecondition) => PromiseLike<TNextPrecondition> | TNextPrecondition,
+    teardown?: ((precondition: TNextPrecondition) => PromiseLike<void> | void) | undefined
   ): {
     and: Given<TNextPrecondition>;
     when: When<TNextPrecondition, void>;
@@ -31,16 +31,16 @@ interface Given<TPrecondition> {
 type WhenPermutation<TPrecondition, TOutcome, TNextOutcome> =
   | readonly [
       string,
-      (precondition: TPrecondition, outcome: TOutcome) => Promise<TNextOutcome> | TNextOutcome,
-      ((precondition: TPrecondition, outcome: TNextOutcome) => Promise<void> | void) | undefined
+      (precondition: TPrecondition, outcome: TOutcome) => PromiseLike<TNextOutcome> | TNextOutcome,
+      ((precondition: TPrecondition, outcome: TNextOutcome) => PromiseLike<void> | void) | undefined
     ]
-  | readonly [string, (precondition: TPrecondition, outcome: TOutcome) => Promise<TNextOutcome> | TNextOutcome];
+  | readonly [string, (precondition: TPrecondition, outcome: TOutcome) => PromiseLike<TNextOutcome> | TNextOutcome];
 
 interface When<TPrecondition, TOutcome> {
   <TNextOutcome>(
     message: string,
-    setup: (precondition: TPrecondition, outcome: TOutcome) => Promise<TNextOutcome> | TNextOutcome,
-    teardown?: ((precondition: TPrecondition, outcome: TNextOutcome) => Promise<void> | void) | undefined
+    setup: (precondition: TPrecondition, outcome: TOutcome) => PromiseLike<TNextOutcome> | TNextOutcome,
+    teardown?: ((precondition: TPrecondition, outcome: TNextOutcome) => PromiseLike<void> | void) | undefined
   ): {
     then: Then<TPrecondition, TNextOutcome>;
   };
@@ -61,8 +61,8 @@ interface Then<TPrecondition, TOutcome> {
 }
 
 interface TestFacility {
-  afterEach: (fn: () => Promise<void> | void) => void;
-  beforeEach: (fn: () => Promise<void> | void) => void;
+  afterEach: (fn: () => PromiseLike<void> | void) => void;
+  beforeEach: (fn: () => PromiseLike<void> | void) => void;
   describe: (message: string, fn: () => void) => void;
   it: (message: string, fn: (() => PromiseLike<void>) | (() => void)) => void;
 }
@@ -84,7 +84,7 @@ type ThenFrame<TPrecondition, TOutcome> = {
   isConjunction: boolean;
   message: string;
   operation: 'then';
-  fn: (precondition: TPrecondition, outcome: TOutcome) => Promise<void> | void;
+  fn: (precondition: TPrecondition, outcome: TOutcome) => PromiseLike<void> | void;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -94,8 +94,8 @@ function createChain(mutableStacks: (readonly Frame[])[], stack: readonly Frame[
   const given: (isConjunction: boolean) => Given<unknown> = (isConjunction: boolean) => {
     const given: Given<unknown> = <TNextPrecondition>(
       message: string,
-      setup: (value: unknown) => Promise<TNextPrecondition> | TNextPrecondition,
-      teardown?: ((value: TNextPrecondition) => Promise<void> | void) | undefined
+      setup: (value: unknown) => PromiseLike<TNextPrecondition> | TNextPrecondition,
+      teardown?: ((value: TNextPrecondition) => PromiseLike<void> | void) | undefined
     ) => {
       const nextChain = createChain(
         mutableStacks,
@@ -206,7 +206,7 @@ function scenario(
     given: createChain(stacks, Object.freeze([])).given(false) as Given<void>
   });
 
-  if (isPromise(fnResult)) {
+  if (isPromiseLike(fnResult)) {
     // This is a soft block.
     // While we can technically allow fn() to be asynchronous, we are blocking it
     // to prevent potentially bad code patterns
@@ -262,7 +262,7 @@ function runStack(
 
           const value = setup(preconditionRef.value);
 
-          return isPromise(value) ? value.then(save) : save(value);
+          return isPromiseLike(value) ? value.then(save) : save(value);
         });
 
         facility.afterEach(() => teardown?.(currentPreconditionRef.value));
@@ -283,7 +283,7 @@ function runStack(
 
           const value = setup(preconditionRef.value, outcomeRef.value);
 
-          return isPromise(value) ? value.then(save) : save(value);
+          return isPromiseLike(value) ? value.then(save) : save(value);
         });
 
         facility.afterEach(() => teardown?.(preconditionRef.value, currentOutcomeRef.value));
