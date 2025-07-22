@@ -1,4 +1,4 @@
-import isPromise from './private/isPromise.ts';
+import isPromiseLike from './private/isPromiseLike.ts';
 
 interface BehaviorDrivenDevelopment {
   given: Given<void>;
@@ -206,7 +206,7 @@ function scenario(
     given: createChain(stacks, Object.freeze([])).given(false) as Given<void>
   });
 
-  if (isPromise(fnResult)) {
+  if (isPromiseLike(fnResult)) {
     // This is a soft block.
     // While we can technically allow fn() to be asynchronous, we are blocking it
     // to prevent potentially bad code patterns
@@ -262,7 +262,7 @@ function runStack(
 
           const value = setup(preconditionRef.value);
 
-          return isPromise(value) ? value.then(save) : save(value);
+          return isPromiseLike(value) ? value.then(save) : save(value);
         });
 
         facility.afterEach(() => teardown?.(currentPreconditionRef.value));
@@ -283,7 +283,7 @@ function runStack(
 
           const value = setup(preconditionRef.value, outcomeRef.value);
 
-          return isPromise(value) ? value.then(save) : save(value);
+          return isPromiseLike(value) ? value.then(save) : save(value);
         });
 
         facility.afterEach(() => teardown?.(preconditionRef.value, currentOutcomeRef.value));
