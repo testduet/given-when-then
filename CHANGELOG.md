@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Support `PromiseLike`, by [@compulim](https://github.com/compulim), in PR [#6](https://github.com/testduet/given-when-then/pull/6)
+- Support `PromiseLike`, by [@compulim](https://github.com/compulim), in PR [#6](https://github.com/testduet/given-when-then/pull/6) and [#XXX](https://github.com/testduet/given-when-then/pull/XXX)
 
 ### Changed
 
