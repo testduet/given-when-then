@@ -61,10 +61,10 @@ interface Then<TPrecondition, TOutcome> {
 }
 
 interface TestFacility {
-  afterEach: (fn: () => PromiseLike<void> | void) => void;
-  beforeEach: (fn: () => PromiseLike<void> | void) => void;
+  afterEach: (fn: () => Promise<void> | void) => void;
+  beforeEach: (fn: () => Promise<void> | void) => void;
   describe: (message: string, fn: () => void) => void;
-  it: (message: string, fn: (() => PromiseLike<void>) | (() => void)) => void;
+  it: (message: string, fn: (() => Promise<void>) | (() => void)) => void;
 }
 
 type Ref<T> = { value: T };
@@ -262,10 +262,14 @@ function runStack(
 
           const value = setup(preconditionRef.value);
 
-          return isPromiseLike(value) ? value.then(save) : save(value);
+          return isPromiseLike(value) ? Promise.resolve(value.then(save)) : save(value);
         });
 
-        facility.afterEach(() => teardown?.(currentPreconditionRef.value));
+        facility.afterEach(() => {
+          const value = teardown?.(currentPreconditionRef.value);
+
+          return isPromiseLike(value) ? Promise.resolve(value) : value;
+        });
 
         return runStack(stack.slice(1), preconditionRef, outcomeRef, facility);
       });
@@ -283,10 +287,14 @@ function runStack(
 
           const value = setup(preconditionRef.value, outcomeRef.value);
 
-          return isPromiseLike(value) ? value.then(save) : save(value);
+          return isPromiseLike(value) ? Promise.resolve(value.then(save)) : save(value);
         });
 
-        facility.afterEach(() => teardown?.(preconditionRef.value, currentOutcomeRef.value));
+        facility.afterEach(() => {
+          const value = teardown?.(preconditionRef.value, currentOutcomeRef.value);
+
+          return isPromiseLike(value) ? Promise.resolve(value) : value;
+        });
 
         return runStack(stack.slice(1), preconditionRef, outcomeRef, facility);
       });
