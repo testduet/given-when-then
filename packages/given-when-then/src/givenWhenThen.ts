@@ -164,7 +164,6 @@ function createChain(mutableStacks: (readonly Frame[])[], stack: readonly Frame[
 
       return {
         then: nextChain.then(false) as Then<unknown, Awaited<ReturnType<typeof setup>>>
-        // thenThrow: nextChain.thenThrow() as ThenThrow<unknown>
       } satisfies ReturnType<When<unknown, Awaited<ReturnType<typeof setup>>>>;
     };
 
@@ -182,7 +181,6 @@ function createChain(mutableStacks: (readonly Frame[])[], stack: readonly Frame[
 
       return {
         then: nextChain.then(false) as Then<unknown, TNextOutcome>
-        // thenThrow: nextChain.thenThrow() as ThenThrow<unknown>
       } satisfies ReturnType<When<unknown, TNextOutcome>>;
     }) satisfies When<unknown, unknown>['oneOf'];
 
@@ -251,11 +249,11 @@ function scenario(
     // This is a soft block.
     // While we can technically allow fn() to be asynchronous, we are blocking it
     // to prevent potentially bad code patterns
-    throw new Error('The function passed to scenario() cannot asynchronous');
+    throw new Error('The function passed to scenario() cannot be asynchronous');
   } else if (
     !stacks.some(frames => frames.some(({ operation }) => operation === 'then' || operation === 'then-throw'))
   ) {
-    throw new Error('Scenario should contains at least one then clause');
+    throw new Error('Scenario should contain at least one then clause');
   }
 
   const facility = {

@@ -22,14 +22,14 @@ describe('when() reject should skip then()', () => {
         bdd
           .given('undefined', () => undefined)
           .when('reject', () => Promise.reject(error))
-          .then('should not have been called', () => then);
+          .then('should not have been called', () => then());
       },
       facility
     );
   });
 
   test('it() should have been called', () => expect(facility.it).toHaveBeenCalledTimes(1));
-  test('it() should passed a function that would throw', () => {
+  test('it() should have passed a function that would throw', () => {
     try {
       (facility.it as jest.Mock<void, [string, () => void]>).mock.calls[0]?.[1]();
     } catch (reason) {
