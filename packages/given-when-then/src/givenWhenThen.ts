@@ -43,12 +43,10 @@ interface When<TPrecondition, TOutcome> {
     teardown?: ((precondition: TPrecondition, outcome: TNextOutcome) => PromiseLike<void> | void) | undefined
   ): {
     then: Then<TPrecondition, TNextOutcome>;
-    // thenThrow: ThenThrow<TPrecondition>;
   };
 
   oneOf<TNextOutcome>(permutations: readonly WhenPermutation<TPrecondition, TOutcome, TNextOutcome>[]): {
     then: Then<TPrecondition, TNextOutcome>;
-    // thenThrow: ThenThrow<TPrecondition>;
   };
 }
 

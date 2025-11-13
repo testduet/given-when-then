@@ -20,14 +20,14 @@ describe('when() did not throw but then.throw() is expecting an error', () => {
         bdd
           .given('undefined', () => undefined)
           .when('do nothing', () => {})
-          .then.throw('should not have been called', () => thenThrow);
+          .then.throw('should not have been called', () => thenThrow());
       },
       facility
     );
   });
 
   test('it() should have been called', () => expect(facility.it).toHaveBeenCalledTimes(1));
-  test('it() should passed a function that would throw', () =>
+  test('it() should have passed a function that would throw', () =>
     expect(() => (facility.it as jest.Mock<void, [string, () => void]>).mock.calls[0]?.[1]()).toThrow(
       'Scenario should throw but did not'
     ));
