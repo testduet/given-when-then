@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added new `then.throw()` for testing negatives, by [@compulim](https://github.com/compulim), in PR [#XXX](https://github.com/testduet/given-when-then/pull/XXX)
+- Added new `then.throw()` for testing negatives, by [@compulim](https://github.com/compulim), in PR [#10](https://github.com/testduet/given-when-then/pull/10)
 
 ## [0.1.0] - 2025-07-25
 
