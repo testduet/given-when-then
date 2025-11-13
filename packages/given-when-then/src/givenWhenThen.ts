@@ -102,11 +102,12 @@ type ThenThrowFrame<TPrecondition> = {
   fn: (precondition: TPrecondition, reason: unknown) => PromiseLike<void> | void;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Frame =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   | GivenFrame<unknown, any>
   | ThenFrame<unknown, unknown>
   | ThenThrowFrame<unknown>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   | WhenFrame<unknown, unknown, any>;
 
 function createChain(mutableStacks: (readonly Frame[])[], stack: readonly Frame[]) {
