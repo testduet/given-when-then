@@ -43,10 +43,12 @@ interface When<TPrecondition, TOutcome> {
     teardown?: ((precondition: TPrecondition, outcome: TNextOutcome) => PromiseLike<void> | void) | undefined
   ): {
     then: Then<TPrecondition, TNextOutcome>;
+    // thenThrow: ThenThrow<TPrecondition>;
   };
 
   oneOf<TNextOutcome>(permutations: readonly WhenPermutation<TPrecondition, TOutcome, TNextOutcome>[]): {
     then: Then<TPrecondition, TNextOutcome>;
+    // thenThrow: ThenThrow<TPrecondition>;
   };
 }
 
@@ -57,6 +59,13 @@ interface Then<TPrecondition, TOutcome> {
   ): {
     and: Then<TPrecondition, TOutcome>;
     when: When<TPrecondition, TOutcome>;
+  };
+
+  throw(
+    message: string,
+    fn: (precondition: TPrecondition, reason: unknown) => void
+  ): {
+    when: When<TPrecondition, void>;
   };
 }
 
@@ -87,8 +96,18 @@ type ThenFrame<TPrecondition, TOutcome> = {
   fn: (precondition: TPrecondition, outcome: TOutcome) => PromiseLike<void> | void;
 };
 
+type ThenThrowFrame<TPrecondition> = {
+  message: string;
+  operation: 'then-throw';
+  fn: (precondition: TPrecondition, reason: unknown) => PromiseLike<void> | void;
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Frame = GivenFrame<unknown, any> | ThenFrame<unknown, unknown> | WhenFrame<unknown, unknown, any>;
+type Frame =
+  | GivenFrame<unknown, any>
+  | ThenFrame<unknown, unknown>
+  | ThenThrowFrame<unknown>
+  | WhenFrame<unknown, unknown, any>;
 
 function createChain(mutableStacks: (readonly Frame[])[], stack: readonly Frame[]) {
   const given: (isConjunction: boolean) => Given<unknown> = (isConjunction: boolean) => {
@@ -146,6 +165,7 @@ function createChain(mutableStacks: (readonly Frame[])[], stack: readonly Frame[
 
       return {
         then: nextChain.then(false) as Then<unknown, Awaited<ReturnType<typeof setup>>>
+        // thenThrow: nextChain.thenThrow() as ThenThrow<unknown>
       } satisfies ReturnType<When<unknown, Awaited<ReturnType<typeof setup>>>>;
     };
 
@@ -163,6 +183,7 @@ function createChain(mutableStacks: (readonly Frame[])[], stack: readonly Frame[
 
       return {
         then: nextChain.then(false) as Then<unknown, TNextOutcome>
+        // thenThrow: nextChain.thenThrow() as ThenThrow<unknown>
       } satisfies ReturnType<When<unknown, TNextOutcome>>;
     }) satisfies When<unknown, unknown>['oneOf'];
 
@@ -170,7 +191,7 @@ function createChain(mutableStacks: (readonly Frame[])[], stack: readonly Frame[
   };
 
   const then: (isConjunction: boolean) => Then<unknown, unknown> = isConjunction => {
-    return ((message, fn) => {
+    const then: Then<unknown, unknown> = (message, fn) => {
       mutableStacks.push(
         Object.freeze([
           ...stack,
@@ -189,7 +210,28 @@ function createChain(mutableStacks: (readonly Frame[])[], stack: readonly Frame[
         and: currentChain.then(true),
         when: currentChain.when()
       } satisfies ReturnType<Then<unknown, unknown>>;
-    }) satisfies Then<unknown, unknown>;
+    };
+
+    then.throw = ((message, fn) => {
+      mutableStacks.push(
+        Object.freeze([
+          ...stack,
+          {
+            fn,
+            message,
+            operation: 'then-throw'
+          } satisfies ThenThrowFrame<unknown>
+        ])
+      );
+
+      const currentChain = createChain(mutableStacks, stack);
+
+      return {
+        when: currentChain.when() as When<unknown, void>
+      } satisfies ReturnType<Then<unknown, unknown>['throw']>;
+    }) satisfies Then<unknown, unknown>['throw'];
+
+    return then;
   };
 
   return { given, then, when };
@@ -211,7 +253,9 @@ function scenario(
     // While we can technically allow fn() to be asynchronous, we are blocking it
     // to prevent potentially bad code patterns
     throw new Error('The function passed to scenario() cannot asynchronous');
-  } else if (!stacks.some(frames => frames.some(frame => frame.operation === 'then'))) {
+  } else if (
+    !stacks.some(frames => frames.some(({ operation }) => operation === 'then' || operation === 'then-throw'))
+  ) {
     throw new Error('Scenario should contains at least one then clause');
   }
 
@@ -232,7 +276,7 @@ function scenario(
 
   facility.describe(message, () => {
     for (const stack of stacks) {
-      runStack(stack, { value: undefined }, { value: undefined }, facility);
+      runStack(stack, { value: undefined }, { value: undefined }, { value: undefined }, facility);
     }
   });
 }
@@ -241,6 +285,7 @@ function runStack(
   stack: readonly Frame[],
   preconditionRef: Ref<unknown>,
   outcomeRef: Ref<unknown>,
+  errorRef: Ref<{ readonly reason: unknown } | undefined>,
   facility: TestFacility
 ): void {
   const frame = stack.at(0);
@@ -271,7 +316,7 @@ function runStack(
           return isPromiseLike(value) ? Promise.resolve(value) : value;
         });
 
-        return runStack(stack.slice(1), preconditionRef, outcomeRef, facility);
+        return runStack(stack.slice(1), preconditionRef, outcomeRef, errorRef, facility);
       });
     }
   } else if (frame.operation === 'when') {
@@ -280,31 +325,57 @@ function runStack(
         let currentOutcomeRef: { value: unknown };
 
         facility.beforeEach(() => {
+          const caught = (reason: unknown): void => {
+            errorRef.value = { reason };
+            outcomeRef.value = undefined;
+          };
+
           const save = (value: unknown): void => {
             currentOutcomeRef = { value };
+            errorRef.value = undefined;
             outcomeRef.value = value;
           };
 
-          const value = setup(preconditionRef.value, outcomeRef.value);
+          let value;
 
-          return isPromiseLike(value) ? Promise.resolve(value.then(save)) : save(value);
+          try {
+            value = setup(preconditionRef.value, outcomeRef.value);
+          } catch (reason) {
+            return caught(reason);
+          }
+
+          return isPromiseLike(value) ? Promise.resolve(value.then(save, caught)) : save(value);
         });
 
         facility.afterEach(() => {
-          const value = teardown?.(preconditionRef.value, currentOutcomeRef.value);
+          const value = teardown?.(preconditionRef.value, currentOutcomeRef?.value);
 
           return isPromiseLike(value) ? Promise.resolve(value) : value;
         });
 
-        return runStack(stack.slice(1), preconditionRef, outcomeRef, facility);
+        return runStack(stack.slice(1), preconditionRef, outcomeRef, errorRef, facility);
       });
     }
   } else if (frame.operation === 'then') {
-    facility.it(`${frame.isConjunction ? 'and' : 'then'} ${frame.message}`, () =>
-      frame.fn(preconditionRef.value, outcomeRef.value)
-    );
+    facility.it(`${frame.isConjunction ? 'and' : 'then'} ${frame.message}`, () => {
+      if (errorRef.value) {
+        throw errorRef.value.reason;
+      }
 
-    return runStack(stack.slice(1), preconditionRef, outcomeRef, facility);
+      return frame.fn(preconditionRef.value, outcomeRef.value);
+    });
+
+    return runStack(stack.slice(1), preconditionRef, outcomeRef, errorRef, facility);
+  } else if (frame.operation === 'then-throw') {
+    facility.it(`then throw ${frame.message}`, () => {
+      if (!errorRef.value) {
+        throw new Error('Scenario should throw but did not');
+      }
+
+      return frame.fn(preconditionRef.value, errorRef.value.reason);
+    });
+
+    return runStack(stack.slice(1), preconditionRef, outcomeRef, errorRef, facility);
   }
 }
 

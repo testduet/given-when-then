@@ -195,6 +195,27 @@ scenario('simple', bdd => {
 });
 ```
 
+### Negative testing
+
+Negative testing can be used to verify that the `when()` clause should fail.
+
+```ts
+scenario('negative', bdd => {
+  bdd
+    .given('a = 1', () => {
+      return { a: 1 };
+    })
+
+    .when('throw', () => {
+      throw new Error('"a" cannot be 1');
+    })
+
+    .then.throw('with error message', (_, error) => {
+      expect(error).toHaveProperty('message', '"a" cannot be 1');
+    });
+});
+```
+
 ## Behaviors
 
 ### Is it another test framework?
