@@ -30,3 +30,12 @@ jobs:
         with:
           name: package-lock
           path: package-lock.json
+
+  run-npm-clean-install:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: 'actions/setup-node@v6'
+      - uses: 'actions/checkout@v6'
+      - run: npm clean-install --omit optional
