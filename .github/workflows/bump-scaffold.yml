@@ -30,16 +30,3 @@ jobs:
       package-name: ${{ inputs.package-name }}
       skip-integration-test: ${{ inputs.skip-integration-test }}
       use-react: ${{ inputs.use-react }}
-
-  run-npm-install:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: 'actions/setup-node@v6'
-      - uses: 'actions/checkout@v6'
-      - run: npm install
-      - uses: 'actions/upload-artifact@v6'
-        with:
-          name: package-lock
-          path: package-lock.json
