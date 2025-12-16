@@ -37,7 +37,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/compulim/given-when-then.git"
+    "url": "https://github.com/testduet/given-when-then.git"
   },
   "keywords": [
     "bdd",
