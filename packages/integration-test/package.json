@@ -13,7 +13,12 @@
     "precommit": "ESLINT_USE_FLAT_CONFIG=false eslint --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts ./",
     "pretest": "if test \"$CI\" = \"true\"; then npm run build; npm run docker -- --detach --wait; fi",
     "switch": "cat package.json | jq --arg SWITCH_NAME $SWITCH_NAME -r '(.[\"switch:\" + $SWITCH_NAME] // {}) as $TEMPLATE | .devDependencies += ($TEMPLATE.devDependencies // {}) | .dependencies += ($TEMPLATE.dependencies // {})' | tee ./package.json.tmp && mv ./package.json.tmp ./package.json",
-    "test": "node --import ./happy-dom-env.ts --test ${CI:---watch} **/*.{spec,test}.{[jt]s,[jt]sx,c[jt]s,m[jt]s}"
+    "test": "npm run test:jasmine && npm run test:jest && npm run test:mocha && npm run test:node && npm run test:vitest",
+    "test:mocha": "mocha --recursive test/**/*.mocha.*",
+    "test:node": "node --test test/**/*.node.*",
+    "test:jasmine": "jasmine --config=jasmine.json",
+    "test:jest": "jest",
+    "test:vitest": "vitest run"
   },
   "author": "William Wong (https://github.com/compulim)",
   "license": "MIT",
@@ -23,6 +28,8 @@
   "devDependencies": {
     "@babel/preset-env": "^7.28.0",
     "@babel/preset-react": "^7.27.1",
+    "@happy-dom/global-registrator": "^20.0.11",
+    "@testduet/wait-for": "^0.1.0",
     "@tsconfig/strictest": "^2.0.5",
     "core-js-pure": "^3.44.0",
     "jasmine": "^5.9.0",

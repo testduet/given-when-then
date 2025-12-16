@@ -7,8 +7,9 @@
     "moduleResolution": "Bundler",
     "noEmit": true,
     "strict": true,
+    "strictBuiltinIteratorReturn": false,
     "target": "ESNext",
-    "types": ["node"]
+    "types": ["jest", "node"]
   },
   "extends": "@tsconfig/recommended/tsconfig.json",
   "include": ["**/*.spec.ts", "**/*.spec.tsx", "**/*.test.ts", "**/*.test.tsx", "__tests__/**/*"]

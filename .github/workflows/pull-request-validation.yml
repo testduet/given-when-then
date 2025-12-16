@@ -11,9 +11,10 @@ jobs:
       contents: read
     strategy:
       matrix:
-        switch: [current, react-16, react-17, react-18]
+        switch: [current]
     uses: compulim/workflows/.github/workflows/pull-request-validation.yml@main
     with:
+      node-version: 24
       package-name: '@testduet/given-when-then'
       skip-integration-test: false
       switch: ${{ matrix.switch }}
