@@ -26,6 +26,7 @@ describe('given an URL', () => {
       expect(res.headers.get('content-type')).toBe('application/json'));
 
     describe('when body is parsed as JSON', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let body: any;
 
       beforeEach(async () => {
@@ -37,6 +38,7 @@ describe('given an URL', () => {
     });
 
     describe('when body is parsed as text', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let body: any;
 
       beforeEach(async () => {

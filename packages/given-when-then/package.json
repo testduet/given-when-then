@@ -3,6 +3,7 @@
   "version": "0.0.0-0",
   "description": "Write behavior-driven development (BDD) tests using \"given-when-then\" pattern and execute them in any traditional \"describe-before-it-after\" test framework.",
   "files": [
+    "./*.js",
     "./dist/"
   ],
   "exports": {
@@ -30,12 +31,13 @@
     "precommit:typescript:production": "tsc --noEmit --project ./src/tsconfig.precommit.production.json",
     "precommit:typescript:test": "tsc --noEmit --project ./src/tsconfig.precommit.test.json",
     "prepack": "cp ../../CHANGELOG.md . && cp ../../LICENSE . && cp ../../README.md .",
+    "start": "npm run build -- --onSuccess \"touch ../pages/package.json\" --watch",
     "switch": "cat package.json | jq --arg SWITCH_NAME $SWITCH_NAME -r '(.[\"switch:\" + $SWITCH_NAME] // {}) as $TEMPLATE | .devDependencies += ($TEMPLATE.devDependencies // {}) | .dependencies += ($TEMPLATE.dependencies // {})' | tee ./package.json.tmp && mv ./package.json.tmp ./package.json",
     "test": "jest"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/testduet/given-when-then.git"
+    "url": "https://github.com/compulim/given-when-then.git"
   },
   "keywords": [
     "bdd",
@@ -67,6 +69,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.28.0",
     "@babel/preset-typescript": "^7.27.1",
+    "@happy-dom/global-registrator": "^20.0.11",
     "@testing-library/react": "^16.3.0",
     "@tsconfig/recommended": "^1.0.10",
     "@tsconfig/strictest": "^2.0.5",
