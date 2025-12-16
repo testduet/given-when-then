@@ -36,10 +36,10 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: '@actions/setup-node'
-      - uses: '@actions/checkout'
+      - uses: '@actions/setup-node@main'
+      - uses: '@actions/checkout@main'
       - run: npm install
-      - uses: '@actions/upload-artifact'
+      - uses: '@actions/upload-artifact@main'
         with:
           name: package-lock
           path: package-lock.json
