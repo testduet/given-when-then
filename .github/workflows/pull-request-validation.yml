@@ -24,6 +24,8 @@ jobs:
       contents: read
     steps:
       - uses: 'actions/setup-node@v6'
+        with:
+          node-version: 24
       - uses: 'actions/checkout@v6'
       - run: npm install
       - uses: 'actions/upload-artifact@v6'
@@ -37,5 +39,7 @@ jobs:
       contents: read
     steps:
       - uses: 'actions/setup-node@v6'
+        with:
+          node-version: 24
       - uses: 'actions/checkout@v6'
       - run: npm clean-install --omit optional
