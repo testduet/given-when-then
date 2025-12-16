@@ -17,3 +17,16 @@ jobs:
       package-name: '@testduet/given-when-then'
       skip-integration-test: false
       switch: ${{ matrix.switch }}
+
+  run-npm-install:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: 'actions/setup-node@v6'
+      - uses: 'actions/checkout@v6'
+      - run: npm install
+      - uses: 'actions/upload-artifact@v6'
+        with:
+          name: package-lock
+          path: package-lock.json
