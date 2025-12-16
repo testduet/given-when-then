@@ -4,9 +4,10 @@ export default defineConfig([
   {
     dts: true,
     entry: {
-      'given-when-then': './src/index.ts',
+      ['given-when-then'.split('/').at(-1) as string]: './src/index.ts'
     },
     format: ['cjs', 'esm'],
-    sourcemap: true
+    sourcemap: true,
+    target: 'esnext'
   }
 ]);
